@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from models.user import User
 from database import db
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, logout_user, login_required
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "my_secret_key"
@@ -42,6 +43,16 @@ def login():
     return jsonify({
         "message": "credentials not completed"
     }), 400
+
+@app.get('/logout')
+@login_required
+def logout():
+    
+    logout_user()
+  
+    return jsonify({
+        "message": "user is now out of application !!!"
+    })
 
 @app.get("/")
 def hello_world():
