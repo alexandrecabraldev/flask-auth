@@ -17,10 +17,9 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    #user = session.get(User,user_id)
-    user= User.get(user_id)
+    user = db.session.get(User,user_id)
     #user = User.query.get(user_id)
-    print(user.username)
+    print(type(user))
     return user
 
 @app.post('/login')
@@ -55,6 +54,7 @@ def logout():
     })
 
 @app.get("/")
+@login_required
 def hello_world():
     return "hello world"
 
