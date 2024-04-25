@@ -18,8 +18,8 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     user = db.session.get(User,user_id)
-    #user = User.query.get(user_id)
-    print(type(user))
+    #user = User.query.get(user_id) deprecated
+
     return user
 
 @app.post('/login')
@@ -31,7 +31,6 @@ def login():
     
     if username and password:
         user = User.query.filter_by(username= username).first()
-        print(user)
 
         if user and user.password == password:
             login_user(user)
@@ -42,6 +41,26 @@ def login():
     return jsonify({
         "message": "credentials not completed"
     }), 400
+
+@app.post('/user')
+@login_required
+def user_registration():
+    user = request.json
+    username= user.get("username")
+    password= user.get('password')
+
+    print(user)
+    if not username or not password:
+        return jsonify({
+            "message": "invalid data"
+        }), 400
+    
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({
+        "message": "user registrated !!!"
+    })
 
 @app.get('/logout')
 @login_required
