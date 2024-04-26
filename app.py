@@ -124,10 +124,17 @@ def logout():
         "message": "user is now out of application !!!"
     })
 
-@app.get("/")
+@app.get("/user")
 @login_required
-def hello_world():
-    return "hello world"
+def get_all_users():
+
+    users = User.query.all()
+    username_list=[]
+    
+    for user in users:
+        username_list.append(user.username)
+
+    return jsonify({"users":username_list})
 
 if __name__ == "__main__":
     app.run(debug=True)
