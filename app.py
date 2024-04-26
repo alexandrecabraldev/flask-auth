@@ -42,6 +42,7 @@ def login():
         "message": "credentials not completed"
     }), 400
 
+#user so pode ser criado por outro usuário, se quiser criação sem autenticação é só retirar o @login_required
 @app.post('/user')
 @login_required
 def user_registration():
@@ -55,7 +56,7 @@ def user_registration():
             "message": "invalid data"
         }), 400
     
-    new_user = User(username=username, password=password)
+    new_user = User(username=username, password=password, role='user')
     db.session.add(new_user)
     db.session.commit()
     return jsonify({
@@ -73,11 +74,14 @@ def get_specific_user(user_id):
     print(user)
     return jsonify({"username": user.username})
 
-@app.post('/user/<int:user_id>')
+@app.put('/user/<int:user_id>')
 @login_required
 def update_specific_user(user_id):
     data= request.json
     user= db.session.get(User,user_id)
+    
+    if current_user.role == 'user' and current_user.id != user_id:
+        return jsonify({"message": f"forbiden, user {current_user.username} can only update themselves"}), 403
     
     if not user:
         return jsonify({"message": "user not found"}), 404
@@ -96,11 +100,13 @@ def update_specific_user(user_id):
 @login_required
 def delete_specific_user(user_id):
 
-    user= db.session.get(User, user_id)
-    print(user)
-
+    if current_user.role != "admin":
+        return jsonify({"message": "Forbiden, only admin can delete users"}), 403
+    
     if current_user.id == user_id:
         return jsonify({"message": "not possble delete yourself"}), 403
+    
+    user= db.session.get(User, user_id)
     
     if not user:
         return jsonify({"message": "user not found"})
@@ -111,7 +117,6 @@ def delete_specific_user(user_id):
     return jsonify({
         "message": f"user {user.username} deleted sucessfull !!!"
     })
-
 
 
 @app.get('/logout')
