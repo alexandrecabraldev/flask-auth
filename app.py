@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from models.user import User
 from database import db
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 
 app = Flask(__name__)
@@ -72,6 +72,25 @@ def get_specific_user(user_id):
     
     print(user)
     return jsonify({"username": user.username})
+
+@app.post('/user/<int:user_id>')
+@login_required
+def update_specific_user(user_id):
+    data= request.json
+    user= db.session.get(User,user_id)
+    
+    if not user:
+        return jsonify({"message": "user not found"}), 404
+    
+    if not data.get('password'):
+        return jsonify({"message": "password not found"}), 404
+    
+    user.password = data.get('password')
+    db.session.commit()
+
+    return jsonify({
+        "message": f"user {user.username} updated"
+    })
 
 
 @app.get('/logout')
