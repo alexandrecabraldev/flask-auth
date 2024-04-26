@@ -62,6 +62,18 @@ def user_registration():
         "message": "user registrated !!!"
     })
 
+@app.get('/user/<int:user_id>')
+@login_required
+def get_specific_user(user_id):
+    user = db.session.get(User,user_id)
+
+    if not user:
+        return jsonify({"message": "user not found"}), 404
+    
+    print(user)
+    return jsonify({"username": user.username})
+
+
 @app.get('/logout')
 @login_required
 def logout():
