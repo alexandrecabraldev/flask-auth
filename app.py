@@ -92,6 +92,27 @@ def update_specific_user(user_id):
         "message": f"user {user.username} updated"
     })
 
+@app.delete('/user/<int:user_id>')
+@login_required
+def delete_specific_user(user_id):
+
+    user= db.session.get(User, user_id)
+    print(user)
+
+    if current_user.id == user_id:
+        return jsonify({"message": "not possble delete yourself"}), 403
+    
+    if not user:
+        return jsonify({"message": "user not found"})
+    
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({
+        "message": f"user {user.username} deleted sucessfull !!!"
+    })
+
+
 
 @app.get('/logout')
 @login_required
